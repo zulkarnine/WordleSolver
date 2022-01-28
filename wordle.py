@@ -63,12 +63,30 @@ class Wordle:
                 result.append((c, LetterVerdict.YELLOW))
             else:
                 result.append((c, LetterVerdict.GRAY))
+
+        attempt_verdict = AttemptVerdict.WON
         for _, verdict in result:
             if verdict != LetterVerdict.GREEN:
-                return AttemptVerdict.FAILED_ATTEMPT, result
+                attempt_verdict = AttemptVerdict.FAILED_ATTEMPT
+                break
 
-        return AttemptVerdict.WON, result
+        print(get_letter_verdicts_colored(result))
+        return attempt_verdict, result
 
+
+def get_letter_verdicts_colored(verdicts):
+    if not verdicts:
+        return verdicts
+
+    colors = []
+    for l, v in verdicts:
+        if v == LetterVerdict.GREEN:
+            colors.append("🟩️")
+        elif v == LetterVerdict.YELLOW:
+            colors.append("🟨")
+        else:
+            colors.append("⬜️")
+    return "".join(colors)
 
 def play_single_game(wordle):
     wordle.reset()
@@ -76,10 +94,10 @@ def play_single_game(wordle):
     for i in range(MAX_ATTEMPT):
         guess = input("Guess: ")
         result, letter_verdicts = wordle.guess(guess)
-        if result:
+        if result == AttemptVerdict.WON:
             print("Contratz! You've won!")
             return
-        print(letter_verdicts)
+        # print(letter_verdicts)
 
     print("Sorry, you've lost the game")
 

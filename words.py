@@ -6,6 +6,7 @@ def load_all_words(letter_count=5):
     with open("/usr/share/dict/words", "r") as word_file:
         return sorted([word.strip().lower() for word in word_file.readlines() if len(word.strip()) == letter_count])
 
+
 def get_letter_freq_map(words):
     counter = Counter()
     for w in words:
@@ -13,9 +14,6 @@ def get_letter_freq_map(words):
             counter[c] += 1
     return counter
 
+
 def get_letter_freq_sorted_list(words):
-    counter = Counter()
-    for w in words:
-        for c in w:
-            counter[c] += 1
-    return sorted(counter.items(), key=lambda item: item[1], reverse=True)
+    return sorted(get_letter_freq_map(words).items(), key=lambda item: item[1], reverse=True)

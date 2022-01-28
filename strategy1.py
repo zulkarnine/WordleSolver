@@ -1,5 +1,5 @@
 from words import load_all_words, get_letter_freq_sorted_list, get_letter_freq_map
-from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, Wordle, MAX_ATTEMPT
+from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, MAX_ATTEMPT, get_letter_verdicts_colored
 
 DEB = False
 
@@ -91,7 +91,7 @@ class WordleSolver1:
             result, letter_verdicts = wordle.guess(guess)
             # print(f"Attempt: {attempt} {get_letter_verdicts_color(letter_verdicts)}")
             if DEB:
-                print(get_letter_verdicts_color(letter_verdicts), end="")
+                print(get_letter_verdicts_colored(letter_verdicts), end="")
 
             if result == AttemptVerdict.WON:
                 return True
