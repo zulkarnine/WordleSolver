@@ -4,14 +4,14 @@
 
 Algorithm to solve [Wordle](https://www.powerlanguage.co.uk/wordle/) 100% of the time within 6 attempts.
 
-- You can go ahead and run `main.py` run it for all 2315 Wordle words and it solves 100% of them correctly within **6 attempts**.
+- You can go ahead and run `main.py` to run it for all 2315 Wordle words and it solves 100% of them correctly within **6 attempts**.
 **Example output:**
 ```
 Ran: 2315 games.
 Solved: 2315/2315 = 100.00%
 ```
 
-- You can also run `solver.py` to get a sense of how it's guessing and what is the `Wordle` game simulation returning. (I.e. the colored blocks.
+- You can also run `solver.py` to get a sense of how it's guessing and what is the `Wordle` game simulation returning. (I.e. the colored blocks)
 
 **Example output:**
 ```
