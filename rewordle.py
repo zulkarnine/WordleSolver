@@ -48,7 +48,7 @@ class Rewordle(Wordle):
 
     def play(self, solver:WordleSolver1):
         solver.reset()
-        solver.try_solve(self)
+        solver.solve(self)
 
 
 if __name__ == '__main__':

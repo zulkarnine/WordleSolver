@@ -6,7 +6,7 @@ def run_new_game(wordle, solver):
     wordle.next_game()
     solver.reset()
     # print(f"Actual word: {wordle.todays_word}")
-    result = solver.try_solve(wordle)
+    result = solver.solve(wordle)
     # print(f"result {result} attempts: {wordle.attempt}")
     return result, solver.attempt
 

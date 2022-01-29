@@ -28,17 +28,18 @@ class Wordle:
         self.all_candidate_words = sorted(get_all_wordle_words()) # load_all_words(LETTER_COUNT)
         self.word_set = set(self.all_candidate_words)
         self.attempt = 0
-        self.todays_word = self.get_todays_word()
+        self.todays_word = ""
         self.letter_set = set()
         self.reset()
 
-    def get_todays_word(self):
-        return self.all_candidate_words[self.day % len(self.all_candidate_words)]
+    def override_todays_word(self, word):
+        self.todays_word = word
+        self.letter_set = set(word)
 
     # Resets the game
     def reset(self):
         self.attempt = 0
-        self.todays_word = self.get_todays_word()
+        self.todays_word = self.all_candidate_words[self.day % len(self.all_candidate_words)]
         self.letter_set = set(self.todays_word)
 
     def next_game(self):
