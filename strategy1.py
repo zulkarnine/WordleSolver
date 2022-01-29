@@ -16,6 +16,7 @@ class WordleSolver1:
         self.yellow_blocks = set()
         self.attempt = 0
         self.game_number = -1
+        self.tries = []
         self.reset()
 
     def reset(self):
@@ -26,6 +27,7 @@ class WordleSolver1:
         self.attempt = 0
         self.untried_letters = set(chr(ord('a') + i) for i in range(26))
         self.game_number += 1
+        self.tries.clear()
 
     def contains_forbidden_letters(self, word):
         for c in word:
@@ -109,6 +111,7 @@ class WordleSolver1:
             if DEB:
                 print(f"Guessing: {guess}")
             result, letter_verdicts = wordle.guess(guess)
+            self.tries.append(guess)
             # print(f"Attempt: {attempt} {get_letter_verdicts_color(letter_verdicts)}")
             if DEB:
                 print(get_letter_verdicts_colored(letter_verdicts), end="")

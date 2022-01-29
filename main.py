@@ -11,14 +11,25 @@ def run_new_game(wordle, solver):
     return result, solver.attempt
 
 
-if __name__ == '__main__':
+def run_benchmark():
     wordle = Wordle()
     solver = WordleSolver1()
-    for i in range(len(wordle.all_candidate_words)):
-        # print(i)
-        # if i % 10 == 0:
-        #     print(f"Game: {i}")
+    failed_attempts = []
+    total_games = len(wordle.all_candidate_words)
+    for i in range(total_games):
         result, attempt = run_new_game(wordle, solver)
-        if not result or attempt > 6:
-            print(wordle.todays_word, attempt)
-        # print()
+        if not result:
+            fail = (wordle.todays_word, solver.game_number, solver.attempt, solver.tries[:])
+            print(fail)
+            failed_attempts.append(fail)
+    print(f"Ran: {total_games} games.")
+    print(
+        f"Solved: {total_games - len(failed_attempts)}/{total_games} = {((total_games - len(failed_attempts)) * 100 / total_games):.02f}%")
+
+    print("\nDetails:")
+    for fail in failed_attempts:
+        print(fail)
+
+
+if __name__ == '__main__':
+    run_benchmark()

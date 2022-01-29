@@ -2,7 +2,7 @@ from words import load_all_words, get_all_wordle_words
 from enum import Enum
 
 LETTER_COUNT = 5
-MAX_ATTEMPT = 10
+MAX_ATTEMPT = 6
 
 
 # Enum for letter verdicts
@@ -25,7 +25,7 @@ class AttemptVerdict(Enum):
 class Wordle:
     def __init__(self):
         self.day = 0
-        self.all_candidate_words = get_all_wordle_words() # load_all_words(LETTER_COUNT)
+        self.all_candidate_words = sorted(get_all_wordle_words()) # load_all_words(LETTER_COUNT)
         self.word_set = set(self.all_candidate_words)
         self.attempt = 0
         self.todays_word = self.get_todays_word()
@@ -77,6 +77,9 @@ class Wordle:
                 break
 
         # print(get_letter_verdicts_colored(result))
+        if self.attempt == MAX_ATTEMPT and attempt_verdict == AttemptVerdict.FAILED_ATTEMPT:
+            attempt_verdict = AttemptVerdict.LOST
+
         return attempt_verdict, result
 
 
