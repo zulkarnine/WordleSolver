@@ -61,7 +61,7 @@ class WordleSolver1:
         # Couldn't find a suitable word to explore
         return actual_word
 
-    def pick_a_word(self):
+    def filter_out_invalid_words(self):
         new_candidates = []
         for word in self.candidate_words:
             if self.contains_forbidden_letters(word):
@@ -87,21 +87,51 @@ class WordleSolver1:
                 new_candidates.append(word)
 
         self.candidate_words = new_candidates
+
+    def make_educated_guess(self):
+        untried_letters = dict(self.get_untried_letter_probability())
+        if len(untried_letters) > 1 and self.attempt <= MAX_ATTEMPT - 2:
+            word_with_score = []
+            word_list = self.all_possible_words #if (self.attempt <= MAX_ATTEMPT - 2 and len(untried_letters) >= LETTER_COUNT) else self.candidate_words
+            for word in word_list:
+                score = 0
+                letters = set(word)
+                for c in letters:
+                    if c in untried_letters:
+                        score += untried_letters[c]
+                word_with_score.append((word, score))
+            ranked_words = sorted(word_with_score,
+                                  key=lambda item: (-item[1], item[0]))
+            guess = ranked_words[0][0]
+        else:
+            freq_map = get_letter_freq_map(self.candidate_words)
+            guess = sorted(self.candidate_words, key=lambda word: (-len(set(word)), -sum(freq_map[c] for c in word), word))[0]
+        return guess
+
+    def maybe_substitute_green_letters(self, guess):
+        # if 1 < self.attempt <= MAX_ATTEMPT - 2 and 0 < len(self.green_blocks) < LETTER_COUNT and len(self.candidate_words) != 1:
+        #     new_word = self.get_green_letter_substituted_valid_word(guess)
+        #
+        #     if DEB and guess != new_word:
+        #         print(f"Actual guess: {guess} but trying: {new_word}")
+        #     return new_word
+        return guess
+
+    def pick_a_word(self):
+        self.filter_out_invalid_words()
+
         if len(self.candidate_words) == 0:
             print("Game's word doesn't exist in our dictionary.")
             exit(1)
 
         if DEB:
             print(f"Remaining Candidate: {len(self.candidate_words)}")
-        freq_map = get_letter_freq_map(self.candidate_words)
-        guess = sorted(self.candidate_words, key=lambda word: (-len(set(word)), -sum(freq_map[c] for c in word), word))[0]
-        if 1 < self.attempt <= MAX_ATTEMPT - 1 and 0 < len(self.green_blocks) < LETTER_COUNT and len(self.candidate_words) != 1:
-            new_word = self.get_green_letter_substituted_valid_word(guess)
 
-            if DEB and guess != new_word:
-                print(f"Actual guess: {guess} but trying: {new_word}")
-            return new_word
-        return guess
+        if len(self.candidate_words) == 1:
+            return self.candidate_words[0]
+
+        guess = self.make_educated_guess()
+        return self.maybe_substitute_green_letters(guess)
 
     def try_solve(self, wordle):
         # print(f"\nGame: {self.game_number}")
