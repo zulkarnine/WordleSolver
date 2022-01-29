@@ -1,4 +1,4 @@
-from words import load_all_words
+from words import load_all_words, get_all_wordle_words
 from enum import Enum
 
 LETTER_COUNT = 5
@@ -18,20 +18,22 @@ class AttemptVerdict(Enum):
     LOST = 2
     FAILED_ATTEMPT = 3
     INVALID_TRY = 4
+    INVALID_WORD = 5
 
 
 # Class to simulate playing wordle
 class Wordle:
     def __init__(self):
         self.day = 0
-        self.five_letter_words = load_all_words(LETTER_COUNT)
+        self.all_candidate_words = get_all_wordle_words() # load_all_words(LETTER_COUNT)
+        self.word_set = set(self.all_candidate_words)
         self.attempt = 0
         self.todays_word = self.get_todays_word()
         self.letter_set = set()
         self.reset()
 
     def get_todays_word(self):
-        return self.five_letter_words[self.day % len(self.five_letter_words)]
+        return self.all_candidate_words[self.day % len(self.all_candidate_words)]
 
     # Resets the game
     def reset(self):
@@ -48,6 +50,10 @@ class Wordle:
         if len(word) != LETTER_COUNT:
             print("Give a valid 5 letter word")
             return AttemptVerdict.INVALID_TRY, None
+
+        if word not in self.word_set:
+            print("Invalid word. Doesn't exist in the word set.")
+            return AttemptVerdict.INVALID_WORD, None
 
         self.attempt += 1
         if self.attempt > MAX_ATTEMPT:
@@ -70,7 +76,7 @@ class Wordle:
                 attempt_verdict = AttemptVerdict.FAILED_ATTEMPT
                 break
 
-        print(get_letter_verdicts_colored(result))
+        # print(get_letter_verdicts_colored(result))
         return attempt_verdict, result
 
 

@@ -1,12 +1,14 @@
-from words import load_all_words, get_letter_freq_sorted_list, get_letter_freq_map
-from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, MAX_ATTEMPT, get_letter_verdicts_colored
+from words import load_all_words, get_letter_freq_sorted_list, get_letter_freq_map, get_all_wordle_words
+from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, MAX_ATTEMPT, get_letter_verdicts_colored, Wordle
+from itertools import permutations
+from collections import Counter
 
 DEB = False
 
 # 1st brute force solver
 class WordleSolver1:
     def __init__(self):
-        self.all_possible_words = load_all_words(LETTER_COUNT)
+        self.all_possible_words = set(get_all_wordle_words()) # set(load_all_words(LETTER_COUNT))
         self.invalid_letters = set()
         self.untried_letters = set()
         self.candidate_words = []
@@ -31,6 +33,32 @@ class WordleSolver1:
                 return True
         return False
 
+    def get_untried_letter_probability(self):
+        counter = Counter()
+        for word in self.candidate_words:
+            for c in word:
+                if c in self.untried_letters:
+                    counter[c] += 1
+        return sorted(counter.items(), key=lambda item: (-item[1], item[0]))
+
+    def get_green_letter_substituted_valid_word(self, actual_word):
+        replacing_indexes = [index for _, index in self.green_blocks]
+        if not replacing_indexes:
+            return actual_word
+
+        letters = list(actual_word)
+        untried_letters = self.get_untried_letter_probability()
+        candidate_untried_letters = [letter for letter, _ in untried_letters]
+        perm = permutations(candidate_untried_letters, len(replacing_indexes))
+        for p in perm:
+            for i in range(len(replacing_indexes)):
+                letters[replacing_indexes[i]] = p[i]
+            possible_word = "".join(letters)
+            if possible_word in self.all_possible_words:
+                return possible_word
+        # Couldn't find a suitable word to explore
+        return actual_word
+
     def pick_a_word(self):
         new_candidates = []
         for word in self.candidate_words:
@@ -44,6 +72,9 @@ class WordleSolver1:
                     no_no = True
                     break
 
+            if no_no:
+                continue
+
             for yb in self.yellow_blocks:
                 letter, index = yb
                 if word[index] == letter or letter not in word:
@@ -54,29 +85,20 @@ class WordleSolver1:
                 new_candidates.append(word)
 
         self.candidate_words = new_candidates
+        if len(self.candidate_words) == 0:
+            print("Game's word doesn't exist in our dictionary.")
+            exit(1)
+
         if DEB:
             print(f"Remaining Candidate: {len(self.candidate_words)}")
         freq_map = get_letter_freq_map(self.candidate_words)
         guess = sorted(self.candidate_words, key=lambda word: (-len(set(word)), -sum(freq_map[c] for c in word), word))[0]
         if 1 < self.attempt <= MAX_ATTEMPT - 1 and 0 < len(self.green_blocks) < LETTER_COUNT and len(self.candidate_words) != 1:
-            letter_freq = get_letter_freq_sorted_list(self.candidate_words)
-            # print(letter_freq)
-            letters = list(guess)
-            freq_start = 0
-            for l, i in self.green_blocks:
-                while freq_start < len(letter_freq):
-                    high_freq_letter = letter_freq[freq_start][0]
-                    if high_freq_letter in self.untried_letters and high_freq_letter not in guess:
-                        # just try another probabilistic letter in the green box to rule out or keep.
-                        letters[i] = letter_freq[freq_start][0]
-                        freq_start += 1
-                        break
-                    freq_start += 1
-            modified_guess = "".join(letters)
-            if DEB:
-                print(f"Actual guess: {guess} but trying: {modified_guess}")
-            return modified_guess
+            new_word = self.get_green_letter_substituted_valid_word(guess)
 
+            if DEB and guess != new_word:
+                print(f"Actual guess: {guess} but trying: {new_word}")
+            return new_word
         return guess
 
     def try_solve(self, wordle):
@@ -84,8 +106,6 @@ class WordleSolver1:
         while True:
             self.attempt += 1
             guess = self.pick_a_word()
-            for chr in guess:
-                self.untried_letters.discard(chr)
             if DEB:
                 print(f"Guessing: {guess}")
             result, letter_verdicts = wordle.guess(guess)
@@ -98,6 +118,8 @@ class WordleSolver1:
             elif result == AttemptVerdict.LOST:
                 return False
             elif result == AttemptVerdict.FAILED_ATTEMPT:
+                for chr in guess:
+                    self.untried_letters.discard(chr)
                 for i in range(len(letter_verdicts)):
                     letter, verdict = letter_verdicts[i]
                     if verdict == LetterVerdict.GRAY:
@@ -110,19 +132,18 @@ class WordleSolver1:
                         self.yellow_blocks.add((letter, i))
                     else:
                         exit(1)
+            elif result == AttemptVerdict.INVALID_WORD:
+                self.attempt -= 1
+                self.candidate_words.remove(guess)
+                self.all_possible_words.remove(guess)
 
 
-def get_letter_verdicts_color(verdicts):
-    if not verdicts:
-        return verdicts
-
-    colors = []
-    for l, v in verdicts:
-        if v == LetterVerdict.GREEN:
-            colors.append("🟩️")
-        elif v == LetterVerdict.YELLOW:
-            colors.append("🟨")
-        else:
-            colors.append("⬜️")
-    return "".join(colors)
+if __name__ == '__main__':
+    wordle = Wordle()
+    solver = WordleSolver1()
+    DEB = True
+    for i in range(5):
+        wordle.reset()
+        solver.reset()
+        solver.try_solve(wordle)
 

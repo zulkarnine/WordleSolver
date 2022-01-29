@@ -14,10 +14,10 @@ def run_new_game(wordle, solver):
 if __name__ == '__main__':
     wordle = Wordle()
     solver = WordleSolver1()
-    for i in range(len(wordle.five_letter_words)):
+    for i in range(len(wordle.all_candidate_words)):
         # print(i)
-        if i % 100 == 0:
-            print(f"Game: {i}")
+        # if i % 10 == 0:
+        #     print(f"Game: {i}")
         result, attempt = run_new_game(wordle, solver)
         if not result or attempt > 6:
             print(wordle.todays_word, attempt)
