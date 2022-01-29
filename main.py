@@ -1,5 +1,5 @@
 from wordle import Wordle
-from strategy1 import WordleSolver1
+from solver import WordleSolver
 
 
 def run_new_game(wordle, solver):
@@ -13,10 +13,12 @@ def run_new_game(wordle, solver):
 
 def run_benchmark():
     wordle = Wordle()
-    solver = WordleSolver1()
+    solver = WordleSolver()
     failed_attempts = []
-    total_games = len(wordle.all_candidate_words)
+    total_games = wordle.max_word_count()
     for i in range(total_games):
+        if i % 100 == 0:
+            print(f"Progress: ran {i} games")
         result, attempt = run_new_game(wordle, solver)
         if not result:
             fail = (wordle.todays_word, solver.game_number, solver.attempt, solver.tries[:])

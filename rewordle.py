@@ -1,5 +1,5 @@
 from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, Wordle
-from strategy1 import WordleSolver1
+from solver import WordleSolver
 import re
 
 
@@ -8,7 +8,7 @@ class Rewordle(Wordle):
         super().__init__()
         self.attempt = 0
 
-    def translate_input(self, guess:str, game_verdict:str):
+    def __translate_input(self, guess: str, game_verdict: str):
         if game_verdict.lower() == "invalid":
             return AttemptVerdict.INVALID_WORD, None
         if len(game_verdict) > LETTER_COUNT:
@@ -34,23 +34,23 @@ class Rewordle(Wordle):
 
         return AttemptVerdict.WON, ret
 
-    def guess(self, word:str):
+    def guess(self, word: str):
         print(f"Try: {word}")
 
-        #put this word in the actual wordle game and copy the results in the form 'ggbbb'
+        # put this word in the actual wordle game and copy the results in the form 'ggbbb'
         while True:
             game_verdict = input("What did the game say: ")
-            translated_message = self.translate_input(word, game_verdict)
+            translated_message = self.__translate_input(word, game_verdict)
             if translated_message is None:
                 continue
             else:
                 return translated_message
 
-    def play(self, solver:WordleSolver1):
+    def play(self, solver: WordleSolver):
         solver.reset()
         solver.solve(self)
 
 
 if __name__ == '__main__':
     rewordle = Rewordle()
-    rewordle.play(WordleSolver1())
+    rewordle.play(WordleSolver())

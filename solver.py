@@ -1,12 +1,12 @@
-from words import load_all_words, get_letter_freq_sorted_list, get_letter_freq_map, get_all_wordle_words
+from words import load_all_words, get_all_wordle_words
 from wordle import AttemptVerdict, LetterVerdict, LETTER_COUNT, MAX_ATTEMPT, get_letter_verdicts_colored, Wordle
 from collections import Counter
 
 DEB = False
 
 
-# 1st brute force solver
-class WordleSolver1:
+# Perfect solver for Wordle.
+class WordleSolver:
     def __init__(self):
         self.__all_possible_words = set(get_all_wordle_words())  # set(load_all_words(LETTER_COUNT))
         self.__invalid_letters = set()
@@ -88,7 +88,8 @@ class WordleSolver1:
             guess = ranked_words[0][0]
         else:
             guess = \
-            sorted(self.__candidate_words, key=lambda word: (-len(set(word)), -sum(freq_map[c] for c in word), word))[0]
+                sorted(self.__candidate_words,
+                       key=lambda word: (-len(set(word)), -sum(freq_map[c] for c in word), word))[0]
         return guess
 
     def __pick_a_word(self):
@@ -105,17 +106,22 @@ class WordleSolver1:
         return self.__make_educated_guess()
 
     def solve(self, wordle):
-        # print(f"\nGame: {self.game_number}")
+        if DEB:
+            print("=" * 20)
+            print(f"Game: {self.game_number}")
+            print("=" * 20)
+
         while True:
             self.attempt += 1
             guess = self.__pick_a_word()
             if DEB:
-                print(f"Guessing: {guess}")
+                print(f"Guessing: {guess} ", end="")
             result, letter_verdicts = wordle.guess(guess)
+
             self.tries.append(guess)
-            # print(f"Attempt: {attempt} {get_letter_verdicts_color(letter_verdicts)}")
+
             if DEB:
-                print(get_letter_verdicts_colored(letter_verdicts), end="")
+                print(get_letter_verdicts_colored(letter_verdicts), end=" ")
 
             if result == AttemptVerdict.WON:
                 return True
@@ -142,11 +148,18 @@ class WordleSolver1:
                 self.__all_possible_words.remove(guess)
 
 
-if __name__ == '__main__':
+def play_games(count=1):
     wordle = Wordle()
-    solver = WordleSolver1()
+    solver = WordleSolver()
+    for i in range(count):
+        solver.reset()
+        # wordle.override_todays_word("mover")
+        solver.solve(wordle)
+        print("Actual word:", wordle.todays_word)
+        print()
+        wordle.next_game()
+
+
+if __name__ == '__main__':
     DEB = True
-    print("Actual word:", wordle.todays_word)
-    solver.reset()
-    wordle.override_todays_word("mover")
-    solver.solve(wordle)
+    play_games(5)

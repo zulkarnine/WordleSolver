@@ -24,26 +24,30 @@ class AttemptVerdict(Enum):
 # Class to simulate playing wordle
 class Wordle:
     def __init__(self):
-        self.day = 0
-        self.all_candidate_words = sorted(get_all_wordle_words()) # load_all_words(LETTER_COUNT)
-        self.word_set = set(self.all_candidate_words)
         self.attempt = 0
         self.todays_word = ""
-        self.letter_set = set()
+        self.__day = 0
+        self.__all_candidate_words = sorted(get_all_wordle_words())  # load_all_words(LETTER_COUNT)
+        self.__word_set = set(self.__all_candidate_words)
+        self.__letter_set = set()
+        self.print_tiles = False
         self.reset()
+
+    def max_word_count(self):
+        return len(self.__all_candidate_words)
 
     def override_todays_word(self, word):
         self.todays_word = word
-        self.letter_set = set(word)
+        self.__letter_set = set(word)
 
     # Resets the game
     def reset(self):
         self.attempt = 0
-        self.todays_word = self.all_candidate_words[self.day % len(self.all_candidate_words)]
-        self.letter_set = set(self.todays_word)
+        self.todays_word = self.__all_candidate_words[self.__day % len(self.__all_candidate_words)]
+        self.__letter_set = set(self.todays_word)
 
     def next_game(self):
-        self.day += 1
+        self.__day += 1
         self.reset()
 
     # Returns true if won
@@ -52,7 +56,7 @@ class Wordle:
             print("Give a valid 5 letter word")
             return AttemptVerdict.INVALID_TRY, None
 
-        if word not in self.word_set:
+        if word not in self.__word_set:
             print("Invalid word. Doesn't exist in the word set.")
             return AttemptVerdict.INVALID_WORD, None
 
@@ -66,7 +70,7 @@ class Wordle:
             c = word[i]
             if c == self.todays_word[i]:
                 result.append((c, LetterVerdict.GREEN))
-            elif c in self.letter_set:
+            elif c in self.__letter_set:
                 result.append((c, LetterVerdict.YELLOW))
             else:
                 result.append((c, LetterVerdict.GRAY))
@@ -77,7 +81,9 @@ class Wordle:
                 attempt_verdict = AttemptVerdict.FAILED_ATTEMPT
                 break
 
-        # print(get_letter_verdicts_colored(result))
+        if self.print_tiles:
+            print(get_letter_verdicts_colored(result))
+
         if self.attempt == MAX_ATTEMPT and attempt_verdict == AttemptVerdict.FAILED_ATTEMPT:
             attempt_verdict = AttemptVerdict.LOST
 
@@ -98,6 +104,7 @@ def get_letter_verdicts_colored(verdicts):
             colors.append("⬜️")
     return "".join(colors)
 
+
 def play_single_game(wordle):
     wordle.reset()
     print(wordle.todays_word)
@@ -114,4 +121,5 @@ def play_single_game(wordle):
 
 if __name__ == '__main__':
     wordle = Wordle()
+    wordle.print_tiles = True
     play_single_game(wordle)
