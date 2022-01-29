@@ -21,7 +21,7 @@ class WordleSolver:
 
     def reset(self):
         self.__invalid_letters.clear()
-        self.__candidate_words = list(self.__all_possible_words)
+        self.__candidate_words = sorted(list(self.__all_possible_words))
         self.__yellow_blocks.clear()
         self.__green_blocks.clear()
         self.attempt = 0
